@@ -125,6 +125,37 @@ When analyzing results, group by:
 4. **By signature family** – APT groups, malware families
 5. **By MITRE ATT&CK tag** – Technique-based grouping
 
+## Recommended Analysis Workflow
+
+### Step 1: Sort by Score
+
+Start with highest-scoring events and work down to score 80:
+
+```
+Alerts (81+) → Warnings (60-80) → then switch to module-based
+```
+
+### Step 2: Analyze by Module
+
+After processing high scores, switch to module-based analysis:
+
+1. Select a module (e.g., FileScan)
+2. Choose characteristic columns (e.g., FILE, MAIN_REASON)
+3. Process remaining findings for that module
+4. Repeat for next module
+
+### Key Insight: Quantity vs Relevance
+
+**High detection count = Lower relevance** (opposite of firewall logs)
+
+| Count | Interpretation |
+|-------|---------------|
+| 1-5 endpoints | Likely significant, investigate |
+| 5-30 endpoints | Could be targeted or FP, verify |
+| 100+ endpoints | Almost certainly FP |
+
+Exception: Confirmed widespread campaigns
+
 ## Score Adjustment
 
 Use `--allreasons` to see all contributing factors:

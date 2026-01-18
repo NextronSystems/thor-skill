@@ -142,3 +142,63 @@ a1b2c3d4...;Approved IT tool - JIRA-1234
 
 If YES to most: Likely FP, add to filters.
 If NO to most: Treat as suspicious, investigate further.
+
+## Module-Specific False Positives
+
+### FileScan FPs
+
+| Pattern | Typical FP Cause |
+|---------|------------------|
+| Filename regex IOC match | Legitimate file matching generic pattern |
+| YARA match on THOR reports | Cleartext signatures left from previous scans |
+| Dual-use tools | Admin tools like `nmap.exe`, `ncat.exe` in approved locations |
+| Recycled files | Legitimate tools in Recycle Bin with wrong names (e.g., `$IR4HB6A.exe`) |
+| File size anomaly | Very old legitimate files triggering size checks |
+| Signature anomaly | Old/rare versions of legitimate programs (common with `javaw.exe`) |
+
+### SHIMCache / AmCache FPs
+
+| Pattern | Typical FP Cause |
+|---------|------------------|
+| Strange execution location | Legitimate software using unusual paths |
+| THOR's own path | Admins running THOR from suspicious locations (e.g., `C:\Temp\`) |
+| Suspicious filename pattern | Software with numeric names (`1.exe`) that's actually legitimate |
+
+### LogScan FPs
+
+| Pattern | Typical FP Cause |
+|---------|------------------|
+| Web scan attempts | Vulnerability scanners probing for files (HTTP 404s) |
+| RoboCopy logs | Backup logs listing hack tools being copied as part of backup |
+
+### ProcessCheck FPs
+
+| Pattern | Typical FP Cause |
+|---------|------------------|
+| Strange process location | Legitimate software with unusual install paths |
+| Parent/child anomaly | Old Windows versions (XP, 2003) with different process hierarchy |
+| GeoIP connection | System in region X connecting to servers in region X |
+| Process memory YARA match | AV processes, VMware tools, SearchIndexer containing signatures |
+
+### Registry FPs
+
+| Pattern | Typical FP Cause |
+|---------|------------------|
+| System file in backup path | Values referencing backups (e.g., `\\backupserv\sysbackup\Windows\system32`) |
+| Keyboard layout preload | Regional keyboard settings normal for system location |
+| Hex pattern `4d5a` | Registry value starting with `4d5a` by coincidence |
+
+### Autoruns FPs
+
+| Pattern | Typical FP Cause |
+|---------|------------------|
+| New element | Recently installed legitimate software |
+| Strange autorun location | Legitimate software using unusual persistence |
+
+### ServiceCheck FPs
+
+| Pattern | Typical FP Cause |
+|---------|------------------|
+| Suspicious service path | Legitimate software installed in user folders |
+| Filename IOC match | Service name matching regex pattern |
+| Admin-created service | Services registered manually by admins (e.g., `C:\srvany.exe`) |

@@ -2,17 +2,28 @@
 
 THOR has 30+ modules, each scanning different system aspects. Understanding which module produced a finding helps contextualize it.
 
+**Message Enrichment**: Some modules may produce FileScan-like events due to "Message Enrichment" - when a module includes full file paths, THOR enriches the message with file metadata.
+
 ## File System Modules
 
 ### Filescan
-Most common source of findings. Scans files on disk.
 
-Key indicators:
-- `TARGET`: Full file path
-- `HASH`: MD5/SHA1/SHA256
+Most common source of findings. Scans files on disk. Rich in attributes.
+
+**Sample fields**:
+- `FILE`: Full file path
+- `MD5`, `SHA1`, `SHA256`: File hashes
 - `SIZE`: File size in bytes
+- `TYPE`: Detected file type (may differ from extension)
+- `FIRSTBYTES`: First 20 bytes (hex) + ASCII interpretation
+- `COMPANY`, `DESC`: PE header metadata
+- `OWNER`: File owner account
+- `CREATED`, `MODIFIED`, `ACCESSED`: Timestamps
+- `REASON_1`, `REASON_2`: Individual scoring reasons
 
-Follow-up: Check file metadata, submit to sandbox, review with hex editor.
+**Characteristic analysis columns**: FILE, MAIN_REASON, SCORE
+
+**Follow-up**: Check file metadata, VirusTotal lookup, submit to sandbox, review with hex editor.
 
 ### ArchiveScan
 Scans inside archives (ZIP, RAR, 7z, etc.).
@@ -33,15 +44,33 @@ Timestomping: SI timestamps manipulated, FN timestamps original.
 ## Memory/Process Modules
 
 ### ProcessCheck
-Running process analysis. Memory scanning, handle enumeration.
 
-Key indicators:
+Running process analysis. Evaluates process characteristics, parent/child relations, priorities, locations, network connections, and process memory with YARA.
+
+**Sample fields**:
 - `PID`: Process ID
-- `PROCESS_NAME`: Executable name
-- `COMMAND_LINE`: Full command line
-- `PARENT`: Parent process
+- `PPID`: Parent process ID
+- `PARENT`: Parent process path
+- `NAME`: Process name
+- `OWNER`: Process owner account
+- `COMMAND`: Full command line
+- `PATH`: Executable path
+- `CREATED`: Process creation time
+- `MD5`: Hash of executable
+- `CONNECTION_COUNT`, `LISTEN_PORTS`: Network info
+- `RULE`: YARA rule name (for memory matches)
+- `STRINGS`: Matched strings (for YARA matches)
 
-Follow-up: Memory dump, process tree analysis, handle review.
+**Types of detections**:
+1. Process location anomalies (started from suspicious path)
+2. Parent/child relationship anomalies
+3. Process priority anomalies
+4. Network connection anomalies (suspicious GeoIP)
+5. YARA matches on process memory
+
+**Reference**: [Windows System Processes Overview](https://nasbench.medium.com/windows-system-processes-an-overview-for-blue-teams-42fa7a617920)
+
+**Follow-up**: Memory dump, process tree analysis, handle review, network connection analysis.
 
 ### Mutex / Handles
 Named synchronization objects. Malware often creates unique mutexes.
@@ -60,26 +89,56 @@ Key indicators:
 ## Registry Modules
 
 ### RegistryChecks
-Windows Registry analysis for persistence, configuration.
 
-Key indicators:
-- `REG_KEY`: Full registry path
-- `REG_VALUE`: Value name
-- `REG_DATA`: Value content
+Windows Registry analysis. Matches can be caused by filename IOCs, keywords, or YARA signatures.
 
-Common persistence locations:
+**Sample fields**:
+- `KEY`: Full registry key path
+- `NAME`: YARA rule or IOC name
+- `DESCRIPTION`: Rule description
+- `REF`: Reference URL
+- `MATCHED_STRINGS`: Content that matched
+
+**Common persistence locations**:
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 - `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
-- Services, Scheduled Tasks references
+- Services references
+- Scheduled Tasks references
+- Keyboard Layout\Preload (language detection)
 
 ### SHIMCache
-Application compatibility cache. Shows executed programs.
 
-Key indicators:
-- `SHIM_PATH`: Executed file path
-- `SHIM_MODIFIED`: Last modified timestamp
+Application compatibility cache (AppCompatCache). Contains valuable execution evidence.
 
-Note: Presence in SHIMCache indicates execution (or execution attempt).
+**What it shows**: Full path to executed binaries with timestamps (last execution or creation time, depending on Windows version).
+
+**Sample fields**:
+- `ELEMENT`: Executed file path
+- `DATE`: Timestamp (interpretation varies by Windows version)
+- `TYPE`: system/user
+- `HIVEFILE`: Source hive file
+- `MD5`, `SHA1`, `SHA256`: Hashes (only if file still exists on disk)
+
+**Key insight**: If hash fields are empty (`-`), the file was executed but is no longer on disk.
+
+**Message enrichment**: If the file is still present, THOR calculates hashes and includes them.
+
+**Reference**: [Count Upon Security - SHIMCache Artifacts](https://countuponsecurity.com/2016/05/18/digital-forensics-shimcache-artifacts/)
+
+### AmCache
+
+Similar to SHIMCache but includes SHA1 hash for executed programs.
+
+**Sample fields**:
+- `ELEMENT`: Executed file path
+- `SHA1`: Hash from AmCache (not recalculated)
+- `SIZE`, `DESC`, `PRODUCT`, `COMPANY`: File metadata
+- `FIRST_RUN`: First execution timestamp
+- `CREATED`: File creation timestamp
+
+**Advantage over SHIMCache**: Contains SHA1 hash even if file is deleted.
+
+**Reference**: [Swift Forensics - AmCache.hve](http://www.swiftforensics.com/2013/12/amcachehve-in-windows-8-goldmine-for.html)
 
 ## Log Modules
 
@@ -98,9 +157,20 @@ Common high-value Event IDs:
 - 1102: Audit log cleared
 
 ### LogScan
-Generic log file analysis (text logs, application logs).
 
-Parses: Apache, IIS, application logs.
+Generic log file analysis. Processes `*.log` files line by line.
+
+**What it scans**: Each log line is checked with filename IOCs, keyword IOCs, and "keyword" and "log" type YARA rules.
+
+**Sample fields**:
+- `FILE`: Path to the log file
+- `LINE`: Line number in the log file
+- `ELEMENT`: The matched content
+- `PATTERN`: IOC pattern that matched
+
+**Parses**: Apache logs, IIS logs, application logs, any ASCII text log file.
+
+**Note**: THOR performs checks to avoid scanning files that aren't actually ASCII logs despite having `.log` extension.
 
 ## Network Modules
 
@@ -124,17 +194,44 @@ Windows Firewall rule analysis.
 ## Persistence Modules
 
 ### Autoruns
-Auto-start extensibility points (ASEPs).
 
-Covers: Run keys, services, scheduled tasks, browser extensions, etc.
+Auto-start extensibility points (ASEPs). Uses SysInternals Autorunsc.exe under the hood.
+
+**Sample fields**:
+- `LOCATION`: Registry key or file path
+- `ENTRY`: Entry name
+- `ENABLED`: enabled/disabled
+- `CATEGORY`: Drivers, Services, Logon, etc.
+- `PROFILE`: System-wide or per-user
+- `DESC`, `PUBLISHER`: Software metadata
+- `IMAGE_PATH`: Path to executable
+- `LAUNCH_STRING`: Command that runs
+- `MD5`, `SHA256`: File hashes
+
+**Note**: SHA1 hash from Autorunsc.exe is unreliable and suppressed.
+
+**Covers**: Run keys, services, scheduled tasks, browser extensions, drivers, etc.
+
+**Reference**: [Microsoft Sysinternals Autoruns](https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns)
 
 ### ServiceCheck
-Windows service analysis.
 
-Key indicators:
-- `SERVICE_NAME`
-- `SERVICE_PATH`: Binary path
-- `SERVICE_START_TYPE`
+Windows service analysis. Detects suspicious service entries via anomaly checks, blacklisted keywords, and file path anomalies.
+
+**Sample fields**:
+- `KEY`: Service registry key
+- `SERVICE_NAME`: Display name
+- `IMAGE_PATH`: Path to service binary
+- `SHA1`: File hash
+- `START_TYPE`: Auto, Manual, OnDemand, etc.
+- `USER`: Account service runs as
+- `MODIFIED`: Last modification timestamp
+
+**Detection types**:
+1. Service binary in typical attacker location
+2. YARA rule match in service configuration
+3. Blacklisted service names
+4. File path anomalies
 
 ### ScheduledTasks
 Task Scheduler analysis.
