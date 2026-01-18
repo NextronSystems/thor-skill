@@ -16,6 +16,7 @@ Use these references when needed
 - Stuck scans: reference/stuck-scans.md
 - AV/EDR interference patterns: reference/av-edr-interference.md
 - Diagnostics: reference/diagnostics.md
+- Performance and memory issues: reference/performance-and-resources.md
 
 Optional helper script
 - scripts/quick-env-check.sh: quick info dump about folder permissions, free space, CPU/RAM, and THOR files present.

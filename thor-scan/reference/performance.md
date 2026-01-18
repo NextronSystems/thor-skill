@@ -17,7 +17,7 @@ THOR uses a single thread by default. Multi-threading is automatic in `--lab`, `
 
 Modules supporting threading: Filescan, RegistryChecks, Eventlog, Thunderstorm, Dropzone.
 
-**Memory warning**: `--max_file_size` reserves a buffer PER THREAD. With 8 threads and 30MB max_file_size, expect ~240MB just for file buffers.
+**Memory warning**: `--max_file_size` reserves a buffer PER THREAD. With 8 threads and 30MB max_file_size, expect ~240MB just for file buffers. See [performance-and-resources.md](../../thor-troubleshooting/reference/performance-and-resources.md) for detailed memory calculations and troubleshooting.
 
 ## CPU Limiting (`--cpulimit`)
 
