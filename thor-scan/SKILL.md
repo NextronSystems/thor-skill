@@ -21,7 +21,7 @@ Preflight checklist
 3) Check license files (*.lic) in THOR dir.
 4) Check thor-util presence for update/diagnostics/report tasks.
 5) Identify scan target type:
-   - live path, mounted image, memory dump, extracted dumps
+   - live path, mounted image, memory dump, extracted dumps, SSHFS-mounted remote
 6) Choose scan mode and output location; keep outputs deterministic.
 
 Use these references when needed
@@ -32,7 +32,14 @@ Use these references when needed
 - Output and reports: reference/output-and-reporting.md
 - Signature selectors/filters: reference/signature-filtering.md
 
+Example templates
+- examples/windows-live-scan.md
+- examples/linux-mounted-image.md
+- examples/macos-scan.md
+- examples/memory-dump.md
+- examples/sshfs-remote-scan.md - for appliances and unsupported architectures
+
 Output format
 - First line: one recommended command (single-line).
 - Then: short explanation of key flags.
-- Then: “If it fails” section with 2-3 likely causes and next commands to run.
+- Then: "If it fails" section with 2-3 likely causes and next commands to run.

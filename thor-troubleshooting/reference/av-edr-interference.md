@@ -9,6 +9,7 @@
 - CPU usage drops to near-zero
 - Scan progress stops at seemingly random points
 - "Frozen at 98%" pattern (AV scanning THOR's output files)
+- Scan runs 3-10x slower than expected (AV scanning every file THOR reads)
 
 ## How Interference Happens
 
@@ -143,6 +144,24 @@ thor64.exe --quick -a Filescan -p C:\Windows\Temp -e C:\thor-test
 ```
 
 If this completes without hanging, exclusions are likely working.
+
+## Performance Impact
+
+AV/EDR can cause massive performance degradation even when scans don't freeze:
+
+| Scenario | Typical Duration | With AV Interference |
+|----------|------------------|----------------------|
+| Quick scan | 10-20 min | 1-2 hours |
+| Default scan | 1-3 hours | 6-24 hours |
+| Intense scan | 4-8 hours | 24+ hours |
+
+**Why this happens**: Real-time AV scans every file THOR opens. Since THOR may read thousands of files per minute, the AV overhead multiplies dramatically.
+
+**Measurement approach**:
+1. Run a quick scan with AV enabled, note duration
+2. Add exclusions
+3. Re-run same scan, compare times
+4. A 3-10x improvement confirms AV was the bottleneck
 
 ## When Exclusions Aren't Possible
 

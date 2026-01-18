@@ -15,11 +15,12 @@ Global rules
 - THOR versions: v10 is stable; v11 is TechPreview. Some features are v11-only. In particular, THOR Lens relies on the audit trail output, which requires THOR v11 and is not available in THOR v10.
 
 Routing rules
-- If the user wants to run a scan or asks “what command should I run” - use thor-scan.
-- If the user pasted results or asks “what does this finding mean” - use thor-log-analysis.
+- If the user wants to run a scan or asks "what command should I run" - use thor-scan.
+- If the user pasted results or asks "what does this finding mean" - use thor-log-analysis.
 - If the user reports hangs, slowness, crashes, missing output, license/update weirdness - use thor-troubleshooting.
 - If the user asks about update/upgrade/report generation/yara-forge/offline packs - use thor-maintenance.
 - If the user asks about THOR Lens workflows, clustering, rabbit holes, audit-trail ingestion - use thor-lens.
+- If the user asks about thor10.db/thor11.db, scan timing, performance tuning, slow rules, or resume state - use thor-db.
 
 Minimum inputs to collect (only what’s needed)
 - OS (Windows/Linux/macOS)
@@ -35,3 +36,4 @@ Minimum inputs to collect (only what’s needed)
 - [thor-troubleshooting/](thor-troubleshooting/) - Diagnose stuck/slow/failed THOR runs and recommend next actions
 - [thor-maintenance/](thor-maintenance/) - Update/upgrade THOR, manage signature packs, generate reports
 - [thor-lens/](thor-lens/) - THOR Lens workflows; requires THOR v11 audit-trail output
+- [thor-db/](thor-db/) - Analyze ThorDB (thor10.db/thor11.db) for performance tuning and diagnostics

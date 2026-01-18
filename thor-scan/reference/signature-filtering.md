@@ -129,6 +129,44 @@ Disable specific parsing components:
 --exclude-component JumpList
 ```
 
+## Deep Scan Selectors
+
+THOR uses **file magic headers** (not extensions) to decide which files receive full YARA deep scan. This prevents attackers from evading detection by renaming files.
+
+### How It Works
+
+1. THOR reads the first bytes of each file (magic header)
+2. Matches against known executable/document signatures
+3. Only files with recognized magic headers get deep scanned
+4. Extension is a secondary fallback, not primary selector
+
+### Customizing Deep Scan Selection
+
+```bash
+# Add file extensions to deep scan set
+--de .xyz,.abc
+
+# Add magic header (hex) to deep scan set
+--dm 89504E47   # PNG magic header
+
+# List current deep scan selectors
+thor64.exe --print-deepscan-selectors
+```
+
+### Performance Implications
+
+- Adding broad selectors (like text files) can drastically increase scan time
+- Most performance issues come from custom deep scan additions
+- If scan is unexpectedly slow, check custom `--de` or `--dm` flags
+
+### Troubleshooting Missed Files
+
+If THOR doesn't scan a file you expected:
+
+1. Check the file's magic header: `xxd -l 16 <file> | head`
+2. Verify it's a recognized type: `file <file>`
+3. Add the extension or magic header explicitly if needed
+
 ## Practical Examples
 
 ### Hunt for Specific Threat

@@ -66,15 +66,52 @@ thor64.exe --debug --printall -a Filescan -p C:\temp
 
 ## CTRL+C Interrupt Menu
 
-During any scan, press **CTRL+C** to access:
+During any scan, press **CTRL+C** to access the interrupt menu.
 
-1. Currently scanned element
-2. Continue/abort options
+### What It Shows
 
-Use this to identify:
-- Which element is causing slowness
-- Whether the scan is progressing
-- If THOR is responsive
+1. **Currently scanned element** - the file/path/object THOR is processing
+2. **Module** - which THOR module is active (Filescan, Registry, Eventlog, etc.)
+3. **Progress** - overall scan completion percentage
+4. **Continue/abort options** - choose to resume or terminate
+
+### Interactive Options
+
+```
+Press 'c' to continue scanning
+Press 'a' to abort (writes partial results)
+Press 'd' to dump current state to log
+```
+
+### Diagnosis Workflow
+
+1. Press CTRL+C once
+2. Note the **current element** and **module**
+3. Wait 30-60 seconds, press CTRL+C again
+4. Compare: is the element the same?
+
+**If same element**: THOR is stuck on that specific item (see solutions below)
+**If different element**: THOR is progressing, just slowly (may be normal)
+**If no response**: Process may be suspended by AV/EDR
+
+### Common Stuck Elements and Solutions
+
+| Stuck On | Likely Cause | Solution |
+|----------|--------------|----------|
+| Large archive file | Decompression timeout | `--noarchive` or `--max-recursion-depth 2` |
+| Large log file | Line-by-line parsing | `--max_log_lines 500000` |
+| Network path | Slow/unavailable share | Exclude path or use local storage |
+| Single executable | Complex YARA matching | `--yara-timeout 180` |
+| Process memory | Large process or suspended | `--noprocs` on live systems |
+
+### When CTRL+C Doesn't Work
+
+If pressing CTRL+C produces no output:
+
+1. The process may be suspended by AV/EDR
+2. Try `kill -SIGINT <pid>` on Linux (sends same signal)
+3. Check if process is in "T" (traced/stopped) state: `ps aux | grep thor`
+4. See [av-edr-interference.md](av-edr-interference.md) for recovery steps
 
 ## ThorDB Statistics
 

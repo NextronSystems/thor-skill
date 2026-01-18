@@ -84,6 +84,30 @@ If stuck during initialization (before scan starts):
 thor64.exe --init-selector TEST_NONEXISTENT -p C:\temp
 ```
 
+### Slow Due to Deep Scan Selector Overload
+
+**Symptom**: Scan runs but takes much longer than expected on similar systems.
+
+**Cause**: Custom `--de` (extension) or `--dm` (magic header) flags adding too many files to deep scan.
+
+**Diagnosis**:
+```bash
+# Check what deep scan selectors are active
+thor64.exe --print-deepscan-selectors
+
+# Check if you passed custom selectors
+grep -E '\-\-de|\-\-dm' your_command_line
+```
+
+**How deep scan works**: THOR reads file magic headers (not extensions) to determine which files get full YARA scanning. Adding broad selectors like `.txt` or `.log` can increase scan time dramatically.
+
+**Solutions**:
+```bash
+# Remove custom selectors if not needed
+# Use --intense only when necessary (scans ALL files regardless of magic)
+# Review ThorDB timing data for deep_scan category
+```
+
 ## Windows-Specific Issues
 
 ### Quick Edit Mode

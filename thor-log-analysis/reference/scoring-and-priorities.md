@@ -62,6 +62,33 @@ Pattern-based file content detection. Highest signal.
 
 Key fields: `NAME`, `MATCHING_STRINGS`, `TAGS`
 
+#### Looking Up YARA Rules in Valhalla
+
+When you see a YARA match, you can look up the rule in Nextron's Valhalla rule database:
+
+**URL pattern:**
+```
+https://valhalla.nextron-systems.com/info/rule/<RULE_NAME>
+```
+
+**Example**: For a match named `HKTL_Mimikatz_MemoryModule`:
+```
+https://valhalla.nextron-systems.com/info/rule/HKTL_Mimikatz_MemoryModule
+```
+
+**What Valhalla shows:**
+- Rule description and purpose
+- Detection quality (experimental, emerging, stable)
+- MITRE ATT&CK mapping
+- Related samples and references
+- False positive guidance
+- When the rule was added/modified
+
+This is invaluable for assessing whether a detection is:
+- A known false positive pattern
+- A high-confidence threat indicator
+- An experimental rule needing verification
+
 ### Sigma Matches
 Log/event-based detection rules. Applied to Eventlog, log files.
 
