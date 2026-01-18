@@ -29,7 +29,7 @@ Claude should list the THOR skills:
 - **thor-log-analysis** – Interpret THOR results
 - **thor-troubleshooting** – Diagnose THOR issues
 - **thor-maintenance** – Update/upgrade THOR
-- **thor-lens** – THOR Lens workflows (requires v11)
+- **thor-lens** – THOR Lens forensic timeline viewer (requires v11)
 - **thor-db** – Analyze ThorDB for performance tuning
 
 ## Skills Overview
@@ -40,7 +40,7 @@ Claude should list the THOR skills:
 | thor-log-analysis | You have results to analyze or triage |
 | thor-troubleshooting | THOR is stuck, slow, or failing |
 | thor-maintenance | You need to update signatures or upgrade THOR |
-| thor-lens | You want to visualize/cluster audit trail data |
+| thor-lens | You want to explore forensic timelines in a web UI |
 | thor-db | You want to analyze scan timing or find slow rules |
 
 ## Requirements

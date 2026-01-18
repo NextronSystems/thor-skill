@@ -19,7 +19,7 @@ Routing rules
 - If the user pasted results or asks "what does this finding mean" - use thor-log-analysis.
 - If the user reports hangs, slowness, crashes, missing output, license/update weirdness - use thor-troubleshooting.
 - If the user asks about update/upgrade/report generation/yara-forge/offline packs - use thor-maintenance.
-- If the user asks about THOR Lens workflows, clustering, rabbit holes, audit-trail ingestion - use thor-lens.
+- If the user asks about THOR Lens, forensic timeline viewing, importing audit trails, or MCP integration for timeline analysis - use thor-lens.
 - If the user asks about thor10.db/thor11.db, scan timing, performance tuning, slow rules, or resume state - use thor-db.
 
 Minimum inputs to collect (only what’s needed)
@@ -35,5 +35,5 @@ Minimum inputs to collect (only what’s needed)
 - [thor-log-analysis/](thor-log-analysis/) - Triage and interpret THOR logs and findings
 - [thor-troubleshooting/](thor-troubleshooting/) - Diagnose stuck/slow/failed THOR runs and recommend next actions
 - [thor-maintenance/](thor-maintenance/) - Update/upgrade THOR, manage signature packs, generate reports
-- [thor-lens/](thor-lens/) - THOR Lens workflows; requires THOR v11 audit-trail output
+- [thor-lens/](thor-lens/) - THOR Lens forensic timeline viewer; import audit trails, web UI, MCP integration (requires THOR v11)
 - [thor-db/](thor-db/) - Analyze ThorDB (thor10.db/thor11.db) for performance tuning and diagnostics

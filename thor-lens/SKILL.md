@@ -1,43 +1,82 @@
 ---
 name: thor-lens
-description: THOR Lens workflows for visualizing and clustering scan results. Requires THOR v11 audit trail output (not available in v10).
+description: THOR Lens workflows for forensic timeline analysis. A web UI that imports THOR v11 audit trail JSONL logs for interactive exploration. Requires THOR v11 (audit trail not available in v10).
 ---
 
 # THOR Lens Skill
 
-THOR Lens is a visualization and analysis tool for THOR scan results that helps analysts explore relationships between findings, cluster suspicious elements, and discover lateral connections.
+THOR Lens is a forensic timeline viewer that transforms THOR v11 audit trail files into an interactive exploration interface.
 
-**Critical Requirement**: THOR Lens requires the audit trail output from THOR v11. This feature is not available in THOR v10.
+**Critical Boundary**:
+- THOR Lens is a **web UI application** - users interact in the browser
+- The CLI handles **build**, **import**, and **serve** - not scanning
+- THOR Lens **does not scan** - it visualizes data from THOR scans
+- Requires **THOR v11** audit trail output (v10 does not produce this format)
 
-## Prerequisites Check
+## Quickstart
 
-Before starting a THOR Lens workflow:
+```bash
+# 1. Clone and build
+git clone https://github.com/NextronSystems/thor-lens.git
+cd thor-lens
+make build
 
-1. Verify THOR version is v11 or later
-2. Confirm audit trail was enabled during scan (`--audit-trail`)
-3. Locate the audit trail file (`.json.gz` format)
+# 2. Import an audit trail
+./thorlens import --log /path/to/audit.jsonl --case mycase
+
+# 3. Serve and open browser
+./thorlens serve --case ./cases/mycase --port 8080
+# Open http://127.0.0.1:8080
+```
 
 ## When to Use THOR Lens
 
-- Multiple scan results need correlation
-- Looking for patterns across findings
-- Investigating lateral movement or related artifacts
-- Visualizing relationships between suspicious elements
-- Clustering analysis for triage prioritization
+- Investigating timelines from THOR v11 scans
+- Correlating events across time ranges
+- Exploring high-score detections and their context
+- Annotating findings with tags, comments, bookmarks
+- MCP integration with Claude Code for AI-assisted analysis
 
 ## References
 
-- [Overview](reference/overview.md) - THOR Lens concepts and capabilities
-- [Audit Trail Requirements](reference/audit-trail-requirements.md) - Required THOR configuration
-- [Clustering Notes](reference/clustering-notes.md) - How clustering works
+- [Quickstart](reference/quickstart.md) - Get running in 5 minutes
+- [Build & Prerequisites](reference/build-and-prereqs.md) - Go, Node.js, make requirements
+- [Import & Cases](reference/import-and-cases.md) - Importing audit trails, case structure
+- [Serve & UI](reference/serve-and-ui.md) - Web server, UI features, keyboard shortcuts
+- [MCP Integration](reference/mcp-integration.md) - Claude Code setup, MCP tools
+- [Audit Trail Generation](reference/audit-trail-generation.md) - THOR v11 commands for audit trail
+
+## Troubleshooting
+
+- [Common Issues](troubleshooting/common-issues.md) - Build, import, serve problems
+- [Empty UI](troubleshooting/empty-ui.md) - Why the timeline shows nothing
+- [MCP Issues](troubleshooting/mcp-issues.md) - Connection and configuration problems
 
 ## Examples
 
-- [Minimal Workflow](examples/minimal-workflow.md) - Basic THOR Lens usage
+- [End-to-End Local](examples/end-to-end-local.md) - Full workflow on local machine
+- [Case from Mounted Image](examples/case-from-mounted-image.md) - Forensic image workflow
+- [Case from SSHFS](examples/case-from-sshfs.md) - Remote system via SSH mount
+
+## Helper Scripts
+
+- [scripts/validate_audit_trail.sh](scripts/validate_audit_trail.sh) - Check audit trail file validity
+- [scripts/case_inventory.sh](scripts/case_inventory.sh) - List case contents and stats
+
+## Key Facts
+
+| Item | Value |
+|------|-------|
+| Upstream repo | https://github.com/NextronSystems/thor-lens |
+| Default port | 8080 |
+| Case storage | `./cases/<name>/` |
+| Input format | JSONL (`.jsonl` or `.jsonl.gz`) |
+| MCP stdio | `./thorlens serve --case <path> --mcp-stdio` |
+| MCP HTTP | `http://localhost:8080/mcp` (default) |
 
 ## Workflow Rules
 
-1. Always verify THOR v11 was used before attempting THOR Lens analysis
-2. Ensure audit trail file is complete (scan finished successfully)
-3. Check file integrity (gzip should decompress without errors)
-4. Large audit trails may require significant memory for processing
+1. Always verify audit trail was generated with THOR v11 before importing
+2. Use `--virtual-map` and `-j` during THOR scans to preserve path/hostname context
+3. MCP stdio mode is recommended for Claude Code integration
+4. Never expose MCP HTTP endpoint publicly (no authentication)
