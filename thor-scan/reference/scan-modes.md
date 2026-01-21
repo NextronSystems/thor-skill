@@ -32,12 +32,15 @@ Use for: fragile production systems, legacy hardware.
 Maximum coverage. Not recommended for production endpoints.
 
 Enables:
+
 - Every file scanned regardless of extension/magic header
 - Max file size: 200MB (vs 30MB default)
 - MFT analysis by default
 - All safeguards disabled
 
-Use for: lab analysis, forensic workstations (often combined with `--lab`).
+Use for: lab analysis, forensic workstations.
+
+**Note:** The `--lab` flag already includes `--intense`. Do NOT combine `--lab --intense` - it's redundant.
 
 ## Diff Mode (`--diff`)
 
@@ -62,7 +65,10 @@ Use for: quick recent-activity triage, SIEM verification.
 | Combination | Typical Use Case |
 |-------------|------------------|
 | `--soft --diff` | Follow-up on fragile systems |
-| `--intense --lab` | Forensic image analysis |
+| `--lab` | Forensic image analysis (already includes `--intense`) |
 | `--quick --lookback 7` | Fast 7-day activity check |
 
-Note: Not all combinations make sense (e.g., `--quick --intense` conflicts).
+**Invalid combinations:**
+
+- `--lab --intense` – Redundant, `--lab` already enables intense mode
+- `--quick --intense` – Conflicting goals

@@ -19,15 +19,24 @@ Preflight checklist
 1. List the THOR install directory first (`ls` or `dir`). This immediately tells you:
    - Which THOR version you have (binary names contain "lite" for THOR Lite)
    - What binaries and tools are available
+   - What license files exist
 2. Verify the correct binary exists:
    - Full THOR: `thor64.exe` (Windows), `thor-linux-64` (Linux), `thor-macosx` (macOS)
    - THOR Lite: `thor64-lite.exe` (Windows), `thor-lite-linux-64` (Linux), `thor-lite-macos` (macOS)
-3. Check license files (*.lic) in THOR dir.
+3. If recommending `--lab` mode, check license type first:
+   - `grep -i forensiclab *.lic` - if found, `--lab` is available
+   - If not found (or THOR Lite), use alternative: `-a Filescan --intense --norescontrol --cross-platform`
 4. Check thor-util presence for update/diagnostics/report tasks.
 5. Identify scan target type:
    - live path, mounted image, memory dump, extracted dumps, SSHFS-mounted remote
 6. Choose scan mode and output location; keep outputs deterministic.
 7. If THOR Lite: note that lab mode and Sigma are unavailable. See [THOR Lite limitations](../thor-lite/SKILL.md).
+
+Important flag rules
+
+- **Never use `--lab --intense` together** - `--lab` already includes intense mode
+- **Check license before recommending `--lab`** - requires Forensic Lab license
+- **THOR Lite has no `--lab`** - always use the alternative flag combination
 
 Use these references when needed
 
