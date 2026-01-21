@@ -19,13 +19,21 @@ thor-util diagnostics --output /path/to/diagnostics.zip
 
 ### What It Collects
 
-- System information (OS, CPU, RAM, disk)
-- THOR configuration files
-- Recent log files
-- License information (sanitized)
-- Running process list
-- Resource usage statistics
-- ThorDB statistics (if available)
+The diagnostics pack (`diagnostics.zip`) contains:
+
+| File | Description |
+|------|-------------|
+| `parameters.json` | Full THOR configuration snapshot - all flags and their values at collection time |
+| `progress.json` | Real-time scan state: current module, worker tasks with stack traces, CPU wait % |
+| `cpu.pprof` | CPU profiling data (Go pprof format) - shows where THOR spent CPU time |
+| `heap.pprof` | Heap/memory profiling - shows memory allocation by function |
+| `goroutine.pprof` | Goroutine stack traces - shows what all threads are doing (deadlock detection) |
+| `newestlog.txt` | Recent THOR log output at collection time |
+| `processlist.json` | All running processes on the system |
+| `thor.dmp` | Memory dump of the THOR process |
+| `diagnostics.log` | Log of the diagnostics collection itself |
+
+**Note:** The `.pprof` files are particularly useful for diagnosing slow scans or stuck processes. See [Analyzing pprof Files](#analyzing-pprof-files) below.
 
 ### When to Use Each Mode
 
@@ -37,6 +45,150 @@ thor-util diagnostics --output /path/to/diagnostics.zip
 | Suspect AV/EDR interference | `thor-util diagnostics --run` |
 
 The `--run` flag re-executes the last scan command with debug logging and monitors for external process interference (AV/EDR signals).
+
+## Analyzing pprof Files
+
+The diagnostics pack includes Go pprof profiling files that provide deep insight into THOR's runtime behavior. These require Go to be installed (`go tool pprof`).
+
+### Prerequisites
+
+```bash
+# Check if Go is installed
+go version
+
+# If not installed:
+# macOS: brew install go
+# Linux: apt install golang / yum install golang
+# Windows: download from https://go.dev/dl/
+```
+
+### Quick Analysis (Command Line)
+
+```bash
+# Extract the diagnostics pack
+unzip diagnostics.zip -d diagnostics-pack
+cd diagnostics-pack
+
+# CPU: Show top CPU consumers
+go tool pprof -top cpu.pprof
+
+# CPU: Show top by cumulative time (includes time in called functions)
+go tool pprof -top -cum cpu.pprof
+
+# Memory: Show top memory allocators
+go tool pprof -top heap.pprof
+
+# Goroutines: Show all goroutine stacks (find stuck/blocked threads)
+go tool pprof -top goroutine.pprof
+```
+
+### Interactive Mode
+
+```bash
+# Start interactive session
+go tool pprof cpu.pprof
+
+# Inside pprof:
+(pprof) top           # Top consumers
+(pprof) top -cum      # Top by cumulative time
+(pprof) list funcName # Show annotated source for a function
+(pprof) web           # Generate SVG call graph (requires graphviz)
+(pprof) png           # Generate PNG call graph
+(pprof) quit
+```
+
+### Web UI with Flame Graph
+
+The most visual way to analyze profiles:
+
+```bash
+# Start web UI on port 8080
+go tool pprof -http=:8080 cpu.pprof
+
+# Opens browser with:
+# - Flame graph (best for finding hot paths)
+# - Call graph
+# - Top functions
+# - Source view
+```
+
+### What Each Profile Reveals
+
+**cpu.pprof - CPU Time Analysis**
+- Which YARA rules are slow
+- Which modules consume the most CPU
+- Hot code paths during scanning
+
+Common findings:
+- Expensive regex in YARA rules
+- Slow archive decompression
+- Inefficient file matching patterns
+
+**heap.pprof - Memory Analysis**
+- What's consuming memory
+- Memory leaks
+- Large allocations
+
+Common findings:
+- Large files loaded into memory
+- Many small allocations from string processing
+- Signature compilation memory usage
+
+**goroutine.pprof - Thread/Concurrency Analysis**
+- What each worker thread is doing
+- Blocked/waiting goroutines
+- Potential deadlocks
+
+Common findings:
+- Workers stuck on I/O (network/disk)
+- Lock contention
+- Goroutines waiting on external resources
+
+### Example: Finding a Slow YARA Rule
+
+```bash
+# 1. Check CPU profile for YARA-related functions
+go tool pprof -top cpu.pprof | grep -i yara
+
+# 2. Start web UI for detailed view
+go tool pprof -http=:8080 cpu.pprof
+
+# 3. In flame graph, look for tall stacks under:
+#    - yara.* functions
+#    - regexp.* functions (regex matching)
+#    - compress.* functions (archive handling)
+```
+
+### Example: Finding Why THOR Is Stuck
+
+```bash
+# Check goroutine stacks
+go tool pprof -top goroutine.pprof
+
+# Look for goroutines in these states:
+# - "IO wait" - stuck on disk/network
+# - "select" - waiting for channel
+# - "lock" - waiting for mutex
+
+# View full stack traces
+go tool pprof goroutine.pprof
+(pprof) traces
+```
+
+### Sharing pprof Analysis
+
+To share findings with support or colleagues:
+
+```bash
+# Generate a PDF report
+go tool pprof -pdf cpu.pprof > cpu-analysis.pdf
+
+# Generate SVG (vector, zoomable)
+go tool pprof -svg cpu.pprof > cpu-analysis.svg
+
+# Generate text report
+go tool pprof -text cpu.pprof > cpu-analysis.txt
+```
 
 ## Debug Mode
 

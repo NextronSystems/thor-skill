@@ -16,8 +16,10 @@ Rules
 
 Preflight checklist
 
-1. Get the THOR install path (or infer from current working dir).
-2. Verify binaries exist:
+1. List the THOR install directory first (`ls` or `dir`). This immediately tells you:
+   - Which THOR version you have (binary names contain "lite" for THOR Lite)
+   - What binaries and tools are available
+2. Verify the correct binary exists:
    - Full THOR: `thor64.exe` (Windows), `thor-linux-64` (Linux), `thor-macosx` (macOS)
    - THOR Lite: `thor64-lite.exe` (Windows), `thor-lite-linux-64` (Linux), `thor-lite-macos` (macOS)
 3. Check license files (*.lic) in THOR dir.

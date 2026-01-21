@@ -1,6 +1,6 @@
 ---
 name: thor-skills
-description: Entry point and router for THOR-related work: running scans, analyzing THOR logs, troubleshooting THOR behavior, maintaining THOR installs, and THOR Lens workflows (audit-trail requires THOR v11).
+description: Entry point and router for THOR-related work: running scans, analyzing THOR logs, troubleshooting THOR behavior, maintaining THOR installs, THOR Lens workflows, writing THOR plugins (v11+), and creating custom signatures/IOCs.
 ---
 
 # THOR Skills
@@ -24,6 +24,8 @@ Global rules
 - If the user asks about THOR Lens, forensic timeline viewing, importing audit trails, or MCP integration for timeline analysis - use thor-lens (note: requires full THOR v11, not compatible with THOR Lite).
 - If the user asks about thor10.db/thor11.db, scan timing, performance tuning, slow rules, or resume state - use thor-db.
 - If the user asks why a feature is missing, expects full THOR behavior from Lite, or asks about Lite limitations - use thor-lite.
+- If the user wants to write a plugin, extend THOR functionality, parse custom formats, or asks about the plugin API - use thor-plugins (requires THOR v11+).
+- If the user wants to create custom IOCs, YARA rules, Sigma rules, STIX indicators, or asks about the custom-signatures folder - use custom-signatures.
 
 ## Minimum inputs to collect (only what's needed)
 
@@ -42,3 +44,5 @@ Global rules
 - [thor-lens/](thor-lens/) - THOR Lens forensic timeline viewer; import audit trails, web UI, MCP integration (requires THOR v11)
 - [thor-db/](thor-db/) - Analyze ThorDB (thor10.db/thor11.db) for performance tuning and diagnostics
 - [thor-lite/](thor-lite/) - THOR Lite limitations, workarounds, and guidance for the free scanner
+- [thor-plugins/](thor-plugins/) - Write custom THOR plugins to extend scanner functionality (requires THOR v11+)
+- [custom-signatures/](custom-signatures/) - Create custom IOCs, YARA rules, Sigma rules, and STIX indicators
