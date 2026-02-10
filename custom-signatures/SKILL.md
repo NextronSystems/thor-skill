@@ -40,13 +40,17 @@ Filename tags determine IOC type. Tag is detected via regex `\Wc2\W` (word bound
 
 ### YARA Rules
 
-- **Generic rules**: Applied to files, process memory, DeepDive chunks
-- **Specific rules** (tag in filename):
-  - `registry` - Registry key/value detection
-  - `log` - Log file and eventlog detection
-  - `process` or `memory` - Process memory only
-  - `keyword` - All string checks across modules
-  - `meta` - All files (first 2KB + externals only)
+**Critical:** The filename determines how THOR initializes the rule. See [YARA Rules Reference](reference/yara-rules.md#yara-rule-types) for full details.
+
+| Filename Contains | Rule Type | Applied To |
+|-------------------|-----------|------------|
+| (none), `process` | Generic rules | Files, process memory, DeepDive chunks |
+| `meta` | Meta rules | All files (first 64KB + externals) |
+| `keyword` | Keyword rules | THOR module output (tasks, services, etc.) |
+| `registry` | Registry rules | Registry keys/values |
+| `log` | Log rules | Log lines, event log entries |
+
+**Common mistake:** Using `limit = "ScheduledTasks"` without `keyword` in the filename. This causes the rule to be initialized as a **generic rule** (file/memory scanner), which won't match module output like scheduled task names.
 
 ### Sigma Rules
 
